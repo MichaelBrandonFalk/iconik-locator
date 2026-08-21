@@ -13,7 +13,6 @@
       --panel: #f7f9fb;
       --accent: #0f766e;
       --accent-strong: #115e59;
-      --warn: #8a4b12;
       --bg: #ffffff;
     }
     * { box-sizing: border-box; }
@@ -22,96 +21,59 @@
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--ink);
       background: var(--bg);
-      line-height: 1.45;
+      line-height: 1.5;
     }
     header {
       background: #102027;
       color: #fff;
-      padding: 28px 20px;
+      padding: 30px 20px;
       border-bottom: 5px solid var(--accent);
     }
-    header .wrap, main { max-width: 1120px; margin: 0 auto; }
-    h1 { margin: 0 0 8px; font-size: clamp(2rem, 4vw, 3.2rem); letter-spacing: 0; }
+    header .wrap, main { max-width: 1040px; margin: 0 auto; }
+    h1 { margin: 0 0 8px; font-size: clamp(2rem, 4vw, 3.1rem); letter-spacing: 0; }
     header p { max-width: 760px; margin: 0; color: #d9e5e7; font-size: 1.08rem; }
-    main { padding: 24px 20px 48px; }
-    .grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(280px, .7fr); gap: 22px; align-items: start; }
-    section { margin-bottom: 28px; }
-    .tool, .downloads, .docs {
+    main { padding: 26px 20px 48px; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr); gap: 22px; align-items: start; }
+    section {
       border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--panel);
-      padding: 18px;
+      padding: 20px;
+      margin-bottom: 22px;
     }
     h2 { margin: 0 0 14px; font-size: 1.35rem; letter-spacing: 0; }
-    label { display: block; font-weight: 700; margin: 12px 0 6px; }
-    input, textarea, select {
-      width: 100%;
-      border: 1px solid #aab7c4;
-      border-radius: 6px;
-      padding: 10px 11px;
-      font: inherit;
-      background: #fff;
-      color: var(--ink);
+    p { margin: 0 0 12px; }
+    ol, ul { padding-left: 22px; margin: 0; }
+    li { margin: 8px 0; }
+    code {
+      background: #e8edf2;
+      border-radius: 4px;
+      padding: 2px 5px;
     }
-    textarea { min-height: 112px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-    .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
-    .bulk-panel {
-      border-top: 1px solid var(--line);
-      margin-top: 18px;
-      padding-top: 16px;
-    }
-    button, .button {
+    .button {
       border: 0;
       border-radius: 6px;
       background: var(--accent);
       color: #fff;
-      font: inherit;
-      font-weight: 700;
-      padding: 10px 14px;
-      cursor: pointer;
+      font-weight: 800;
+      padding: 12px 16px;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      min-height: 42px;
+      justify-content: center;
+      min-height: 44px;
     }
-    button.secondary { background: #41505d; }
-    button:hover, .button:hover { background: var(--accent-strong); }
-    pre {
-      white-space: pre-wrap;
-      word-break: break-word;
-      background: #0f1720;
-      color: #e6edf3;
-      border-radius: 8px;
-      padding: 14px;
-      min-height: 150px;
-      overflow: auto;
-    }
-    .download-list { display: grid; gap: 10px; }
-    .download-list a { justify-content: center; }
+    .button:hover { background: var(--accent-strong); }
+    .download-list { display: grid; gap: 10px; margin-bottom: 14px; }
     .note { color: var(--muted); font-size: .95rem; }
-    .warning { color: var(--warn); font-weight: 700; }
-    .help-line {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin: 8px 0 12px;
+    .callout {
+      border-left: 4px solid var(--accent);
+      padding: 10px 12px;
+      background: #edf7f5;
+      margin: 14px 0;
     }
-    .help-line a { color: var(--accent-strong); font-weight: 800; }
-    details.advanced {
-      border-top: 1px solid var(--line);
-      margin-top: 14px;
-      padding-top: 12px;
-    }
-    details.advanced summary {
-      cursor: pointer;
-      font-weight: 800;
-    }
-    code { background: #e8edf2; border-radius: 4px; padding: 2px 5px; }
-    ul { padding-left: 20px; }
     @media (max-width: 820px) {
-      .grid, .row { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
       header { padding-top: 22px; }
     }
   </style>
@@ -120,521 +82,82 @@
   <header>
     <div class="wrap">
       <h1>Iconik Locator</h1>
-      <p>Paste an Iconik asset link, share link, asset UUID, collection link, or S3 URI. Get usable storage paths or reverse-map an S3 path back to Iconik.</p>
+      <p>Download the local Mac app to turn Iconik links into usable storage paths, including AWS CLI-ready <code>s3://</code> URLs.</p>
     </div>
   </header>
   <main>
     <div class="grid">
-      <section class="tool" aria-labelledby="browser-tool">
-        <h2 id="browser-tool">Browser Tool</h2>
-        <p class="note">Credentials stay in this browser session. The request is sent directly from your browser to Iconik.</p>
-        <div class="row">
-          <div>
-            <label for="appId">App-ID</label>
-            <input id="appId" autocomplete="off">
-          </div>
-          <div>
-            <label for="authToken">Auth-Token</label>
-            <input id="authToken" type="password" autocomplete="off">
-          </div>
-          <div>
-            <label for="output">Output</label>
-            <select id="output">
-              <option>S3</option>
-              <option>HTTPS</option>
-              <option>FULL</option>
-            </select>
-          </div>
-        </div>
-        <div class="help-line">
-          <span class="note">Ask your Iconik admin for an App-ID and Auth-Token with asset/file lookup access.</span>
-          <a href="https://app.iconik.io/docs/api.html#setup-your-access" target="_blank" rel="noopener">Need these?</a>
-        </div>
-        <p class="note">Default behavior: if the Iconik URL represents multiple assets, the tool lists each asset and its output.</p>
-        <details class="advanced">
-          <summary>Advanced settings</summary>
-          <label for="host">Iconik host</label>
-          <input id="host" value="https://app.iconik.io" autocomplete="url">
-          <div class="row">
-            <div>
-              <label for="shareMulti">If share has multiple assets</label>
-              <select id="shareMulti">
-                <option>ALL</option>
-                <option>FIRST</option>
-                <option>ERROR</option>
-              </select>
-            </div>
-            <div>
-              <label for="fileMulti">If selected file has multiple online copies</label>
-              <select id="fileMulti">
-                <option>ALL</option>
-                <option>FIRST</option>
-                <option>ERROR</option>
-              </select>
-            </div>
-            <div>
-              <label for="remember">Session</label>
-              <select id="remember">
-                <option value="yes">Remember settings</option>
-                <option value="no">Do not remember</option>
-              </select>
-            </div>
-          </div>
-        </details>
-        <label for="target">Lookup input</label>
-        <textarea id="target" placeholder="https://app.iconik.io/asset/..."></textarea>
-        <div class="actions">
-          <button id="locate">Locate</button>
-          <button class="secondary" id="testApi">Test API Access</button>
-          <button class="secondary" id="copyS3">Copy S3 Only</button>
-          <button class="secondary" id="copy">Copy Output</button>
-          <button class="secondary" id="clear">Clear</button>
-        </div>
-        <pre id="result">Ready</pre>
-        <div class="bulk-panel">
-          <h2>Bulk Lookup</h2>
-          <p class="note">Paste one Iconik URL, share URL, UUID, or s3:// URI per line. CSV uploads must use header: <code>iconik_url</code>. For Excel/XLSX upload, use the local macOS app.</p>
-          <textarea id="bulkInput" placeholder="iconik_url&#10;https://app.iconik.io/asset/..."></textarea>
-          <div class="actions">
-            <button id="runBulk">Run Bulk Lookup</button>
-            <input id="bulkFile" type="file" accept=".csv">
-            <button class="secondary" id="downloadBulk">Download CSV</button>
-            <button class="secondary" id="copyBulkS3">Copy S3 Only</button>
-          </div>
-          <pre id="bulkResult">Bulk results will appear here.</pre>
-        </div>
-      </section>
-      <aside>
-        <section class="downloads" aria-labelledby="downloads">
-          <h2 id="downloads">Downloads</h2>
+      <div>
+        <section aria-labelledby="download">
+          <h2 id="download">Download For Mac</h2>
           <div class="download-list">
-            <a class="button" href="https://github.com/MichaelBrandonFalk/iconik-locator/releases/latest/download/Iconik_Locator_App_v7_0_5_arm64.zip">macOS App: Apple Silicon v7.0.5</a>
-            <a class="button" href="https://github.com/MichaelBrandonFalk/iconik-locator">GitHub Repo & More Options</a>
+            <a class="button" href="https://github.com/MichaelBrandonFalk/iconik-locator/releases/latest/download/Iconik_Locator_App_v7_0_6_arm64.zip">Download Mac App v7.0.6</a>
+            <a class="button" href="https://github.com/MichaelBrandonFalk/iconik-locator">GitHub Repo</a>
           </div>
-          <p class="note">If macOS blocks the app, open <strong>System Settings > Privacy & Security</strong> and allow it. CLI and build options are available in the GitHub repo.</p>
+          <p class="note">This build is for Apple Silicon Macs: M1, M2, M3, and newer. CLI and build options are available in the GitHub repo.</p>
         </section>
-        <section class="docs" aria-labelledby="docs">
-          <h2 id="docs">Docs</h2>
+
+        <section aria-labelledby="install">
+          <h2 id="install">Install And Open</h2>
+          <ol>
+            <li>Download <code>Iconik_Locator_App_v7_0_6_arm64.zip</code>.</li>
+            <li>Double-click the zip file to extract it.</li>
+            <li>Open <code>Iconik Locator 7.0.6_arm64.app</code>.</li>
+            <li>If macOS blocks it, open <strong>System Settings &gt; Privacy &amp; Security</strong>, then choose <strong>Open Anyway</strong> for Iconik Locator.</li>
+          </ol>
+        </section>
+
+        <section aria-labelledby="use">
+          <h2 id="use">Use The App</h2>
+          <ol>
+            <li>Enter your Iconik <strong>App-ID</strong> and <strong>Auth-Token</strong>.</li>
+            <li>Leave output set to <code>S3</code> for AWS CLI-ready URLs.</li>
+            <li>Paste an Iconik asset link, share link, asset UUID, collection link, or <code>s3://</code> URI.</li>
+            <li>Click <strong>Locate</strong>.</li>
+            <li>Use <strong>Copy S3 Only</strong> when you only need the final <code>s3://</code> paths.</li>
+          </ol>
+          <div class="callout">
+            The app saves credentials and settings locally when the save option is enabled, so users do not need to paste them every time.
+          </div>
+        </section>
+
+        <section aria-labelledby="bulk">
+          <h2 id="bulk">Bulk Lookup</h2>
+          <ol>
+            <li>Open the <strong>Bulk Lookup</strong> tab.</li>
+            <li>Paste one Iconik URL, share URL, UUID, or <code>s3://</code> URI per line.</li>
+            <li>For CSV or Excel upload, use a column header named <code>iconik_url</code>.</li>
+            <li>Click <strong>Run Bulk Lookup</strong>.</li>
+            <li>Export results as CSV or XLSX, or copy only the S3 outputs.</li>
+          </ol>
+        </section>
+      </div>
+
+      <aside>
+        <section aria-labelledby="credentials">
+          <h2 id="credentials">Iconik Credentials</h2>
+          <p>Ask your Iconik admin for an App-ID and Auth-Token with asset/file lookup access.</p>
+          <p><a href="https://app.iconik.io/docs/api.html#setup-your-access" target="_blank" rel="noopener">Iconik API setup instructions</a></p>
+          <p class="note">Most users should keep the Iconik host set to <code>https://app.iconik.io</code>. Change it only if your organization uses a different Iconik host.</p>
+        </section>
+
+        <section aria-labelledby="inputs">
+          <h2 id="inputs">Supported Inputs</h2>
           <ul>
-            <li>Forward lookup accepts Iconik asset links, share links, collection links, and UUIDs.</li>
-            <li>Reverse lookup accepts <code>s3://bucket/path/file.mov</code>.</li>
-            <li><code>S3</code> output converts presigned cloud links to AWS CLI-ready paths.</li>
-            <li><code>FULL</code> keeps the presigned URL returned by Iconik.</li>
+            <li>Iconik asset links</li>
+            <li>Iconik share links</li>
+            <li>Iconik asset UUIDs</li>
+            <li>Iconik collection links</li>
+            <li><code>s3://bucket/path/file.mov</code> reverse lookups</li>
           </ul>
-          <p class="warning">Use credentials with the least Iconik permissions needed for lookup.</p>
+        </section>
+
+        <section aria-labelledby="browser">
+          <h2 id="browser">Why No Browser Tool?</h2>
+          <p>The browser version is hidden because Iconik can block direct requests from GitHub Pages. The local Mac app connects directly from your computer and is the supported way to use this tool.</p>
         </section>
       </aside>
     </div>
   </main>
-  <script>
-    const VERSION = "7.0.5";
-    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    const ANY_UUID_RE = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
-    const S3_URI_RE = /^s3:\/\/([^/]+)\/(.*)$/i;
-    const $ = id => document.getElementById(id);
-
-    function loadSettings() {
-      try {
-        const data = JSON.parse(sessionStorage.getItem("iconikLocatorSettings") || "{}");
-        for (const key of ["host", "appId", "output", "shareMulti", "fileMulti"]) {
-          if (["output", "shareMulti", "fileMulti"].includes(key) && data.version !== VERSION) continue;
-          if (data[key] && $(key)) $(key).value = data[key];
-        }
-      } catch {}
-    }
-
-    function saveSettings() {
-      if ($("remember").value !== "yes") return;
-      sessionStorage.setItem("iconikLocatorSettings", JSON.stringify({
-        host: $("host").value,
-        appId: $("appId").value,
-        output: $("output").value,
-        shareMulti: $("shareMulti").value,
-        fileMulti: $("fileMulti").value,
-        version: VERSION
-      }));
-    }
-
-    function apiPath(host, path) {
-      const base = host.trim().replace(/\/+$/, "") || "https://app.iconik.io";
-      return `${base}${path.startsWith("/") ? path : `/${path}`}`;
-    }
-
-    function cleanApiErrorText(text) {
-      if (!text) return "";
-      try {
-        const parsed = JSON.parse(text);
-        return parsed.message || parsed.detail || parsed.error || JSON.stringify(parsed);
-      } catch {
-        return text.replace(/\s+/g, " ").trim();
-      }
-    }
-
-    function explainHttpError(status, detail) {
-      const suffix = detail ? `\n\nIconik response: ${detail.slice(0, 400)}` : "";
-      if (status === 401) {
-        return `Iconik rejected the credentials.\n\nCheck that the App-ID and Auth-Token were copied correctly. Tokens are case-sensitive.${suffix}`;
-      }
-      if (status === 403) {
-        return `Iconik accepted the credentials, but this token does not have permission for that asset, share, file, storage, or search request.\n\nAsk your Iconik admin for asset/file lookup access.${suffix}`;
-      }
-      if (status === 404) {
-        return `Iconik could not find that item, or this token cannot see it.\n\nCheck the Iconik URL and confirm the API user has access.${suffix}`;
-      }
-      if (status === 400 || status === 422) {
-        return `Iconik could not process that lookup request.\n\nCheck that the pasted value is a valid Iconik asset/share URL, asset UUID, collection URL, or s3:// URI.${suffix}`;
-      }
-      if (status === 429) {
-        return `Iconik rate-limited the request. Wait a minute and try again.${suffix}`;
-      }
-      if (status >= 500) {
-        return `Iconik returned a server error (${status}). Try again shortly.${suffix}`;
-      }
-      return `Iconik API error (${status}).${suffix}`;
-    }
-
-    function explainNetworkError(error) {
-      const host = ($("host").value || "https://app.iconik.io").trim();
-      return [
-        "The browser could not reach Iconik.",
-        "",
-        "Because the local app can connect, this is usually browser CORS policy blocking direct API access from this hosted page.",
-        "",
-        "Most likely causes:",
-        "- Browser CORS policy blocked direct API access from this page.",
-        "- Your network/VPN is blocking the browser request.",
-        "- The Iconik host is wrong or unreachable.",
-        "",
-        "Use the local macOS app for reliable lookups and bulk work.",
-        "",
-        `Host used: ${host}`,
-        "",
-        `Browser detail: ${error && error.message ? error.message : String(error)}`
-      ].join("\n");
-    }
-
-    async function request(path, method = "GET", body = null) {
-      let response;
-      try {
-        response = await fetch(apiPath($("host").value, path), {
-          method,
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "App-ID": $("appId").value.trim(),
-            "Auth-Token": $("authToken").value.trim()
-          },
-          body: body ? JSON.stringify(body) : null
-        });
-      } catch (error) {
-        throw new Error(explainNetworkError(error));
-      }
-      if (!response.ok) {
-        const detail = cleanApiErrorText(await response.text());
-        throw new Error(explainHttpError(response.status, detail));
-      }
-      const text = await response.text();
-      try {
-        return text ? JSON.parse(text) : {};
-      } catch {
-        throw new Error(`Iconik returned a response that was not valid JSON.\n\nEndpoint: ${path}\nResponse: ${text.slice(0, 400)}`);
-      }
-    }
-
-    function objectsFrom(data) {
-      if (Array.isArray(data)) return data.filter(x => x && typeof x === "object");
-      if (data && Array.isArray(data.objects)) return data.objects.filter(x => x && typeof x === "object");
-      return [];
-    }
-
-    function parseTarget(raw) {
-      const s = (raw || "").trim().replace(/^["']|["']$/g, "");
-      if (!s) throw new Error("Empty input.");
-      if (/^https?:\/\//i.test(s)) {
-        const url = new URL(s);
-        const path = url.pathname || "";
-        let m = path.match(/\/collections?\/([0-9a-f-]{36})(?:\/|$)/i);
-        if (m) return ["collection", m[1]];
-        m = path.match(/\/assets?\/([0-9a-f-]{36})(?:\/|$)/i);
-        if (m) return ["asset", m[1]];
-        m = path.match(/\/u\/([A-Za-z0-9_-]+)(?:\/|$)/i) || path.match(/\/shares?\/([A-Za-z0-9_-]+)(?:\/|$)/i);
-        if (m) return ["share", m[1]];
-        m = s.match(ANY_UUID_RE);
-        if (m) return ["asset", m[1]];
-        throw new Error("Unrecognized Iconik URL.");
-      }
-      if (S3_URI_RE.test(s)) return ["reverse", s];
-      if (UUID_RE.test(s)) return ["asset", s];
-      return ["share", s];
-    }
-
-    function presignedToHttps(url) {
-      const parsed = new URL(url);
-      return `${parsed.protocol}//${parsed.host}${parsed.pathname}`;
-    }
-
-    function presignedToS3(url) {
-      const parsed = new URL(url);
-      const host = parsed.host;
-      const path = parsed.pathname.replace(/^\/+/, "");
-      let m = host.match(/^([^.]+)\.s3[.-][^.]+\.amazonaws\.com$/i);
-      if (m) return `s3://${m[1]}/${path}`;
-      if (/^s3[.-][^.]+\.amazonaws\.com$/i.test(host) && path.includes("/")) {
-        const [bucket, ...rest] = path.split("/");
-        return `s3://${bucket}/${rest.join("/")}`;
-      }
-      if ([".wasabisys.com", ".backblazeb2.com", ".cloudflarestorage.com"].some(token => host.includes(token)) && path.includes("/")) {
-        const [bucket, ...rest] = path.split("/");
-        return `s3://${bucket}/${rest.join("/")}`;
-      }
-      const first = host.split(".")[0];
-      if (first && !["s3", "storage", "objects"].includes(first.toLowerCase()) && path) return `s3://${first}/${path}`;
-      return url;
-    }
-
-    function formatUrl(url) {
-      if ($("output").value === "FULL") return url;
-      if ($("output").value === "HTTPS") return presignedToHttps(url);
-      return presignedToS3(url);
-    }
-
-    function extractUrls(obj, out = []) {
-      if (Array.isArray(obj)) obj.forEach(item => extractUrls(item, out));
-      else if (obj && typeof obj === "object") {
-        for (const [key, value] of Object.entries(obj)) {
-          if (["download_url", "url", "href"].includes(key) && typeof value === "string" && /^https?:\/\//i.test(value)) out.push(value);
-          else if (value && typeof value === "object") extractUrls(value, out);
-        }
-      }
-      return [...new Set(out)];
-    }
-
-    function chooseFile(files) {
-      const original = files.find(f => String(f.is_original || f.original || "").toLowerCase().match(/^(true|1|yes)$/));
-      if (original) return original;
-      if (!files.length) throw new Error("No files found on asset, or file access is missing.");
-      return [...files].sort((a, b) => Number(b.size || 0) - Number(a.size || 0))[0];
-    }
-
-    async function listFiles(assetId) {
-      let path = `/API/files/v1/assets/${assetId}/files/?page=1&per_page=100`;
-      const files = [];
-      while (path) {
-        const data = await request(path);
-        files.push(...objectsFrom(data));
-        path = data.next_url && data.next_url.startsWith("/API/") ? data.next_url : null;
-      }
-      return files;
-    }
-
-    async function resolveAsset(assetId) {
-      const files = await listFiles(assetId);
-      const chosen = chooseFile(files);
-      const fileId = chosen.id || chosen.file_id;
-      const downloadData = await request(`/API/files/v1/assets/${assetId}/files/${encodeURIComponent(fileId)}/download_url/`);
-      const urls = extractUrls(downloadData).map(formatUrl);
-      if (!urls.length) throw new Error("No download URL was returned for the selected file.");
-      const asset = await request(`/API/assets/v1/assets/${assetId}/`);
-      return { assetId, title: asset.title || asset.name || "", fileName: chosen.filename || chosen.name || "", paths: urls };
-    }
-
-    async function shareAssetIds(shareId) {
-      const data = await request(`/API/acls/v1/shares/${encodeURIComponent(shareId)}/assets/?page=1&per_page=100`);
-      const ids = objectsFrom(data).map(a => a.id || a.asset_id || a.object_id).filter(id => UUID_RE.test(String(id)));
-      if (!ids.length) throw new Error("Share does not resolve to an accessible asset.");
-      const mode = $("shareMulti").value;
-      if (ids.length > 1 && mode === "ERROR") throw new Error(`Share resolves to ${ids.length} assets. Use FIRST or ALL.`);
-      return mode === "FIRST" ? ids.slice(0, 1) : [...new Set(ids)];
-    }
-
-    async function reverseLookup(uri) {
-      const m = uri.match(S3_URI_RE);
-      if (!m) throw new Error("Invalid S3 URI format.");
-      const key = m[2].replace(/^\/+|\/+$/g, "");
-      const filename = key.split("/").pop();
-      let payload = { query: `files.path:"${key}"`, doc_types: ["assets"] };
-      let data = await request("/API/search/v1/search/", "POST", payload);
-      let objects = objectsFrom(data);
-      if (!objects.length && filename !== key) {
-        payload = { query: `files.name:"${filename}"`, doc_types: ["assets"] };
-        data = await request("/API/search/v1/search/", "POST", payload);
-        objects = objectsFrom(data);
-      }
-      const base = ($("host").value || "https://app.iconik.io").replace(/\/+$/, "");
-      if (!objects.length) return `S3 URI\n${uri}\n\nOutputs (0)\nNo Iconik assets found matching that storage path.`;
-      return [`S3 URI\n${uri}`, ...objects.map((obj, idx) => `\nAsset ${idx + 1}\n${obj.title || "(untitled)"}\n${obj.id}\n${base}/asset/${obj.id}`)].join("\n");
-    }
-
-    async function locate() {
-      saveSettings();
-      if (!$("appId").value.trim() || !$("authToken").value.trim()) throw new Error("App-ID and Auth-Token are required.");
-      const [type, id] = parseTarget($("target").value);
-      if (type === "reverse") return reverseLookup(id);
-      if (type === "collection") {
-        const data = await request(`/API/assets/v1/collections/${id}/contents/?page=1&per_page=10`);
-        const items = objectsFrom(data).slice(0, 3).map(obj => `- ${obj.object_type || "Item"}: ${obj.title || "Untitled"}`).join("\n");
-        return `Collection\n${id}\n\nTotal items: ${data.total || 0}\n\nFirst items:\n${items}`;
-      }
-      const assetIds = type === "asset" ? [id] : await shareAssetIds(id);
-      const results = await Promise.all(assetIds.map(resolveAsset));
-      const lines = [];
-      if (results.length > 1) {
-        lines.push(`This Iconik URL resolved to ${results.length} assets.`, "Each asset output is listed below.", "");
-      }
-      for (const result of results) {
-        lines.push("Asset", result.title || "(untitled)", result.assetId, `Selected file: ${result.fileName || "(unnamed)"}`, "", result.paths.length === 1 ? "Output" : `Outputs (${result.paths.length})`, ...result.paths, "");
-      }
-      return lines.join("\n").trim();
-    }
-
-    async function testApiAccess() {
-      saveSettings();
-      if (!$("appId").value.trim() || !$("authToken").value.trim()) throw new Error("App-ID and Auth-Token are required.");
-      const data = await request("/API/files/v1/storages/?page=1&per_page=1");
-      const lines = [
-        "API access test passed.",
-        "",
-        "Iconik accepted the App-ID and Auth-Token.",
-        "The token can access the files/storages API used by this locator.",
-        `Host: ${($("host").value || "https://app.iconik.io").trim()}`
-      ];
-      if (data && data.total !== undefined) lines.push(`Visible storage records: ${data.total}`);
-      return lines.join("\n");
-    }
-
-    function outputRowsFromResults(input, results) {
-      const rows = [];
-      for (const result of results) {
-        for (const output of result.paths || []) {
-          rows.push({
-            input,
-            status: "OK",
-            asset_id: result.assetId || "",
-            asset_title: result.title || "",
-            file_name: result.fileName || "",
-            output,
-            iconik_url: "",
-            error: ""
-          });
-        }
-      }
-      return rows.length ? rows : [{ input, status: "NO_OUTPUT", asset_id: "", asset_title: "", file_name: "", output: "", iconik_url: "", error: "" }];
-    }
-
-    async function locateRows(input) {
-      const [type, id] = parseTarget(input);
-      if (type === "reverse") {
-        const text = await reverseLookup(id);
-        const rows = [];
-        for (const line of text.split("\n")) {
-          if (/^https?:\/\//.test(line)) rows.push({ input, status: "OK", asset_id: "", asset_title: "", file_name: "", output: "", iconik_url: line, error: "" });
-        }
-        return rows.length ? rows : [{ input, status: "NO_MATCH", asset_id: "", asset_title: "", file_name: "", output: "", iconik_url: "", error: "" }];
-      }
-      if (type === "collection") {
-        return [{ input, status: "COLLECTION", asset_id: "", asset_title: "", file_name: "", output: "", iconik_url: "", error: "Collection links are not expanded in browser bulk mode." }];
-      }
-      const assetIds = type === "asset" ? [id] : await shareAssetIds(id);
-      const results = await Promise.all(assetIds.map(resolveAsset));
-      return outputRowsFromResults(input, results);
-    }
-
-    let bulkRows = [];
-
-    function bulkInputs() {
-      return $("bulkInput").value.split(/\r?\n/).map(line => line.trim()).filter(line => line && line.toLowerCase() !== "iconik_url");
-    }
-
-    async function runBulkLookup() {
-      saveSettings();
-      if (!$("appId").value.trim() || !$("authToken").value.trim()) throw new Error("App-ID and Auth-Token are required.");
-      const inputs = bulkInputs();
-      if (!inputs.length) throw new Error("Paste one input per line or load a CSV with header: iconik_url");
-      bulkRows = [];
-      for (let i = 0; i < inputs.length; i++) {
-        $("bulkResult").textContent = `Processing ${i + 1}/${inputs.length}...`;
-        try {
-          bulkRows.push(...await locateRows(inputs[i]));
-        } catch (error) {
-          bulkRows.push({ input: inputs[i], status: "ERROR", asset_id: "", asset_title: "", file_name: "", output: "", iconik_url: "", error: error.message });
-        }
-      }
-      return formatBulkRows(bulkRows);
-    }
-
-    function formatBulkRows(rows) {
-      return rows.map(row => [row.status, row.input, row.asset_title, row.asset_id, row.file_name, row.output || row.iconik_url, row.error].filter(Boolean).join(" | ")).join("\n") || "No results.";
-    }
-
-    function csvEscape(value) {
-      const text = String(value ?? "");
-      return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-    }
-
-    function downloadBulkCsv() {
-      if (!bulkRows.length) return;
-      const fields = ["input", "status", "asset_id", "asset_title", "file_name", "output", "iconik_url", "error"];
-      const csv = [fields.join(","), ...bulkRows.map(row => fields.map(field => csvEscape(row[field])).join(","))].join("\n");
-      const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `iconik_locator_results_${VERSION}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function copyS3From(text) {
-      const matches = text.match(/s3:\/\/[^\s|]+/g) || [];
-      return navigator.clipboard.writeText(matches.join("\n"));
-    }
-
-    $("locate").addEventListener("click", async () => {
-      $("result").textContent = "Looking up...";
-      try {
-        $("result").textContent = await locate();
-      } catch (error) {
-        $("result").textContent = `Lookup failed\n\n${error.message}`;
-      }
-    });
-    $("testApi").addEventListener("click", async () => {
-      $("result").textContent = "Testing API access...";
-      try {
-        $("result").textContent = await testApiAccess();
-      } catch (error) {
-        $("result").textContent = `API access test failed\n\n${error.message}`;
-      }
-    });
-    $("copyS3").addEventListener("click", async () => copyS3From($("result").textContent || ""));
-    $("copy").addEventListener("click", async () => navigator.clipboard.writeText($("result").textContent || ""));
-    $("clear").addEventListener("click", () => { $("target").value = ""; $("result").textContent = "Ready"; });
-    $("runBulk").addEventListener("click", async () => {
-      $("bulkResult").textContent = "Running bulk lookup...";
-      try {
-        $("bulkResult").textContent = await runBulkLookup();
-      } catch (error) {
-        $("bulkResult").textContent = `Bulk lookup failed\n\n${error.message}`;
-      }
-    });
-    $("downloadBulk").addEventListener("click", downloadBulkCsv);
-    $("copyBulkS3").addEventListener("click", async () => copyS3From($("bulkResult").textContent || ""));
-    $("bulkFile").addEventListener("change", async event => {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
-      if (!file.name.toLowerCase().endsWith(".csv")) {
-        $("bulkResult").textContent = "Browser upload supports CSV only. Use the local macOS app for Excel/XLSX upload. CSV header must be: iconik_url";
-        return;
-      }
-      const text = await file.text();
-      const lines = text.split(/\r?\n/).filter(Boolean);
-      const header = (lines.shift() || "").split(",").map(v => v.trim().replace(/^"|"$/g, ""));
-      const idx = header.indexOf("iconik_url");
-      if (idx === -1) {
-        $("bulkResult").textContent = "CSV must include header: iconik_url";
-        return;
-      }
-      $("bulkInput").value = lines.map(line => line.split(",")[idx] || "").join("\n");
-    });
-    loadSettings();
-  </script>
 </body>
 </html>
