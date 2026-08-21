@@ -221,5 +221,17 @@ class TestShareDefaults(unittest.TestCase):
         ])
 
 
+class TestFriendlyErrors(unittest.TestCase):
+
+    def test_permission_error_passes_through(self):
+        self.assertEqual(
+            loc.friendly_error(PermissionError("Unauthorized. Check App-ID and Auth-Token.")),
+            "Unauthorized. Check App-ID and Auth-Token.",
+        )
+
+    def test_file_not_found_is_actionable(self):
+        self.assertIn("token cannot see it", loc.friendly_error(FileNotFoundError("asset")))
+
+
 if __name__ == "__main__":
     unittest.main()

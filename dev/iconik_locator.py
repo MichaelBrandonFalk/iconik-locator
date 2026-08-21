@@ -40,7 +40,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 
-VERSION = "7.0.2"
+VERSION = "7.0.3"
 APP_NAME = "Iconik Storage Locator"
 CONFIG_DIR = os.path.join(
     os.path.expanduser("~"), "Library", "Application Support", "IconikLocator"
@@ -431,6 +431,21 @@ def retry_delay(err: urllib.error.HTTPError, attempt: int) -> float:
     if retry_after and retry_after.isdigit():
         return float(min(int(retry_after), 60))
     return float(min(2 ** attempt, 20))
+
+
+def friendly_error(exc: BaseException) -> str:
+    if isinstance(exc, PermissionError):
+        return str(exc)
+    if isinstance(exc, FileNotFoundError):
+        return "Iconik could not find that item, or this token cannot see it. Check the Iconik URL and API user access."
+    if isinstance(exc, urllib.error.URLError):
+        return f"Network error reaching Iconik. Check the host, VPN/network access, and try again. Detail: {exc}"
+    if isinstance(exc, TimeoutError):
+        return "Network timeout reaching Iconik. Check the host, VPN/network access, and try again."
+    message = str(exc)
+    if "Failed to fetch" in message:
+        return "Network error reaching Iconik. Check the host, VPN/network access, and browser/API access."
+    return message or exc.__class__.__name__
 
 
 def objects_from(data: Any) -> List[Dict[str, Any]]:

@@ -208,7 +208,7 @@
     </div>
   </main>
   <script>
-    const VERSION = "7.0.2";
+    const VERSION = "7.0.3";
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const ANY_UUID_RE = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
     const S3_URI_RE = /^s3:\/\/([^/]+)\/(.*)$/i;
@@ -241,20 +241,81 @@
       return `${base}${path.startsWith("/") ? path : `/${path}`}`;
     }
 
+    function cleanApiErrorText(text) {
+      if (!text) return "";
+      try {
+        const parsed = JSON.parse(text);
+        return parsed.message || parsed.detail || parsed.error || JSON.stringify(parsed);
+      } catch {
+        return text.replace(/\s+/g, " ").trim();
+      }
+    }
+
+    function explainHttpError(status, detail) {
+      const suffix = detail ? `\n\nIconik response: ${detail.slice(0, 400)}` : "";
+      if (status === 401) {
+        return `Iconik rejected the credentials.\n\nCheck that the App-ID and Auth-Token were copied correctly. Tokens are case-sensitive.${suffix}`;
+      }
+      if (status === 403) {
+        return `Iconik accepted the credentials, but this token does not have permission for that asset, share, file, storage, or search request.\n\nAsk your Iconik admin for asset/file lookup access.${suffix}`;
+      }
+      if (status === 404) {
+        return `Iconik could not find that item, or this token cannot see it.\n\nCheck the Iconik URL and confirm the API user has access.${suffix}`;
+      }
+      if (status === 400 || status === 422) {
+        return `Iconik could not process that lookup request.\n\nCheck that the pasted value is a valid Iconik asset/share URL, asset UUID, collection URL, or s3:// URI.${suffix}`;
+      }
+      if (status === 429) {
+        return `Iconik rate-limited the request. Wait a minute and try again.${suffix}`;
+      }
+      if (status >= 500) {
+        return `Iconik returned a server error (${status}). Try again shortly.${suffix}`;
+      }
+      return `Iconik API error (${status}).${suffix}`;
+    }
+
+    function explainNetworkError(error) {
+      const host = ($("host").value || "https://app.iconik.io").trim();
+      return [
+        "The browser could not reach Iconik.",
+        "",
+        "Most likely causes:",
+        "- The Iconik host is wrong or unreachable.",
+        "- Your network/VPN is blocking the request.",
+        "- Browser CORS policy blocked direct API access from this page.",
+        "",
+        `Host used: ${host}`,
+        "",
+        `Browser detail: ${error && error.message ? error.message : String(error)}`
+      ].join("\n");
+    }
+
     async function request(path, method = "GET", body = null) {
-      const response = await fetch(apiPath($("host").value, path), {
-        method,
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          "App-ID": $("appId").value.trim(),
-          "Auth-Token": $("authToken").value.trim()
-        },
-        body: body ? JSON.stringify(body) : null
-      });
-      if (!response.ok) throw new Error(`Iconik API ${response.status}: ${(await response.text()).slice(0, 240)}`);
+      let response;
+      try {
+        response = await fetch(apiPath($("host").value, path), {
+          method,
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "App-ID": $("appId").value.trim(),
+            "Auth-Token": $("authToken").value.trim()
+          },
+          body: body ? JSON.stringify(body) : null
+        });
+      } catch (error) {
+        throw new Error(explainNetworkError(error));
+      }
+      if (!response.ok) {
+        const detail = cleanApiErrorText(await response.text());
+        throw new Error(explainHttpError(response.status, detail));
+      }
       const text = await response.text();
-      return text ? JSON.parse(text) : {};
+      try {
+        return text ? JSON.parse(text) : {};
+      } catch {
+        throw new Error(`Iconik returned a response that was not valid JSON.\n\nEndpoint: ${path}\nResponse: ${text.slice(0, 400)}`);
+      }
     }
 
     function objectsFrom(data) {
@@ -408,7 +469,7 @@
       try {
         $("result").textContent = await locate();
       } catch (error) {
-        $("result").textContent = `ERROR: ${error.message}`;
+        $("result").textContent = `Lookup failed\n\n${error.message}`;
       }
     });
     $("copy").addEventListener("click", async () => navigator.clipboard.writeText($("result").textContent || ""));

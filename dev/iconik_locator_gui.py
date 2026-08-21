@@ -146,7 +146,7 @@ class LocatorApp(tk.Tk):
                 loc.KeychainStore.set(loc.KEYCHAIN_ACCOUNT_AUTH_TOKEN, self.auth_token_var.get().strip())
             self.result_queue.put(("ok", self._format_result(client, result)))
         except Exception as exc:
-            self.result_queue.put(("error", str(exc)))
+            self.result_queue.put(("error", loc.friendly_error(exc)))
 
     def _format_result(self, client: loc.IconikClient, result: Dict[str, Any]) -> str:
         if result["type"] == "collection":
