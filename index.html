@@ -180,6 +180,7 @@
         <textarea id="target" placeholder="https://app.iconik.io/asset/..."></textarea>
         <div class="actions">
           <button id="locate">Locate</button>
+          <button class="secondary" id="testApi">Test API Access</button>
           <button class="secondary" id="copy">Copy Output</button>
           <button class="secondary" id="clear">Clear</button>
         </div>
@@ -190,9 +191,9 @@
           <h2 id="downloads">Downloads</h2>
           <div class="download-list">
             <a class="button" href="https://github.com/MichaelBrandonFalk/iconik-locator/releases/latest/download/Iconik_Locator_App_arm64.zip">macOS App: Apple Silicon</a>
-            <a class="button" href="https://github.com/MichaelBrandonFalk/iconik-locator/releases/latest/download/iconik_locator_arm64.zip">CLI: Apple Silicon</a>
+            <a class="button" href="https://github.com/MichaelBrandonFalk/iconik-locator">GitHub Repo & More Options</a>
           </div>
-          <p class="note">Intel builds are supported by the build script when an x86_64/Rosetta Python is available. If macOS blocks the app, open <strong>System Settings > Privacy & Security</strong> and allow it.</p>
+          <p class="note">If macOS blocks the app, open <strong>System Settings > Privacy & Security</strong> and allow it. CLI and build options are available in the GitHub repo.</p>
         </section>
         <section class="docs" aria-labelledby="docs">
           <h2 id="docs">Docs</h2>
@@ -208,7 +209,7 @@
     </div>
   </main>
   <script>
-    const VERSION = "7.0.3";
+    const VERSION = "7.0.4";
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const ANY_UUID_RE = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
     const S3_URI_RE = /^s3:\/\/([^/]+)\/(.*)$/i;
@@ -464,12 +465,35 @@
       return lines.join("\n").trim();
     }
 
+    async function testApiAccess() {
+      saveSettings();
+      if (!$("appId").value.trim() || !$("authToken").value.trim()) throw new Error("App-ID and Auth-Token are required.");
+      const data = await request("/API/files/v1/storages/?page=1&per_page=1");
+      const lines = [
+        "API access test passed.",
+        "",
+        "Iconik accepted the App-ID and Auth-Token.",
+        "The token can access the files/storages API used by this locator.",
+        `Host: ${($("host").value || "https://app.iconik.io").trim()}`
+      ];
+      if (data && data.total !== undefined) lines.push(`Visible storage records: ${data.total}`);
+      return lines.join("\n");
+    }
+
     $("locate").addEventListener("click", async () => {
       $("result").textContent = "Looking up...";
       try {
         $("result").textContent = await locate();
       } catch (error) {
         $("result").textContent = `Lookup failed\n\n${error.message}`;
+      }
+    });
+    $("testApi").addEventListener("click", async () => {
+      $("result").textContent = "Testing API access...";
+      try {
+        $("result").textContent = await testApiAccess();
+      } catch (error) {
+        $("result").textContent = `API access test failed\n\n${error.message}`;
       }
     });
     $("copy").addEventListener("click", async () => navigator.clipboard.writeText($("result").textContent || ""));

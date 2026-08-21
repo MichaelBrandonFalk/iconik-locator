@@ -63,7 +63,10 @@ class LocatorApp(tk.Tk):
             credentials,
             text="Ask your Iconik admin for an App-ID and Auth-Token with asset/file lookup access.",
         ).grid(row=1, column=0, columnspan=3, sticky="w", pady=(10, 0))
-        ttk.Button(credentials, text="Need these?", command=self._open_credential_help).grid(row=1, column=3, sticky="e", pady=(10, 0))
+        credential_actions = ttk.Frame(credentials)
+        credential_actions.grid(row=1, column=3, sticky="e", pady=(10, 0))
+        ttk.Button(credential_actions, text="Test API Access", command=self.test_api_access).grid(row=0, column=0, sticky="e", padx=(0, 8))
+        ttk.Button(credential_actions, text="Need these?", command=self._open_credential_help).grid(row=0, column=1, sticky="e")
 
         options = ttk.Frame(outer)
         options.grid(row=1, column=0, sticky="ew", pady=(12, 0))
@@ -124,6 +127,36 @@ class LocatorApp(tk.Tk):
         self.output_text.delete("1.0", "end")
         worker = threading.Thread(target=self._lookup_worker, args=(target,), daemon=True)
         worker.start()
+
+    def test_api_access(self) -> None:
+        app_id = self.app_id_var.get().strip()
+        auth_token = self.auth_token_var.get().strip()
+        if not app_id or not auth_token:
+            messagebox.showerror("Missing Credentials", "App-ID and Auth-Token are required.")
+            return
+        self.status_var.set("Testing API access...")
+        self.output_text.delete("1.0", "end")
+        worker = threading.Thread(target=self._test_api_worker, daemon=True)
+        worker.start()
+
+    def _test_api_worker(self) -> None:
+        try:
+            host = self.host_var.get().strip().rstrip("/") or "https://app.iconik.io"
+            client = loc.IconikClient(loc.Auth(host=host, app_id=self.app_id_var.get().strip(), auth_token=self.auth_token_var.get().strip()))
+            data = client.get("/API/files/v1/storages/?page=1&per_page=1")
+            total = data.get("total") if isinstance(data, dict) else None
+            lines = [
+                "API access test passed.",
+                "",
+                "Iconik accepted the App-ID and Auth-Token.",
+                "The token can access the files/storages API used by this locator.",
+                f"Host: {host}",
+            ]
+            if total is not None:
+                lines.append(f"Visible storage records: {total}")
+            self.result_queue.put(("ok", "\n".join(lines)))
+        except Exception as exc:
+            self.result_queue.put(("error", loc.friendly_error(exc)))
 
     def _lookup_worker(self, target: str) -> None:
         try:
