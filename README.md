@@ -6,7 +6,7 @@ The Iconik Storage Locator is a local macOS app designed to quickly find the phy
 
 Get the latest version below. Extract the `.zip` and run the app or executable.
 
-* [**Download macOS App v7.0.8 (Apple Silicon / M1/M2/M3)**](https://github.com/MichaelBrandonFalk/iconik-locator/releases/latest/download/Iconik_Locator_App_v7_0_8_arm64.zip)
+* [**Download macOS App v7.0.9 (Apple Silicon / M1/M2/M3)**](https://github.com/MichaelBrandonFalk/iconik-locator/releases/latest/download/Iconik_Locator_App_v7_0_9_arm64.zip)
 * [**GitHub repo and advanced options**](https://github.com/MichaelBrandonFalk/iconik-locator)
 
 ## Local Mac App

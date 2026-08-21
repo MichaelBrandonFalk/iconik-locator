@@ -102,7 +102,7 @@ class LocatorApp(tk.Tk):
 
         single_tab = ttk.Frame(tabs, padding=12)
         single_tab.columnconfigure(0, weight=1)
-        single_tab.rowconfigure(2, weight=1)
+        single_tab.rowconfigure(2, weight=0, minsize=46)
         tabs.add(single_tab, text="Single Lookup")
 
         ttk.Label(single_tab, text="Lookup input").grid(row=0, column=0, sticky="w")
@@ -110,12 +110,12 @@ class LocatorApp(tk.Tk):
         self.target_text.grid(row=1, column=0, columnspan=5, sticky="ew", pady=(4, 0))
         self.target_text.insert("1.0", "")
         single_actions = ttk.Frame(single_tab)
-        single_actions.grid(row=2, column=0, columnspan=5, sticky="ew", pady=(10, 0))
-        ttk.Button(single_actions, text="Locate", command=self.lookup).grid(row=0, column=0, sticky="w")
-        ttk.Button(single_actions, text="Copy S3 Only", command=self.copy_s3_output).grid(row=0, column=1, sticky="w", padx=(8, 0))
-        ttk.Button(single_actions, text="Copy All Text", command=self.copy_output).grid(row=0, column=2, sticky="w", padx=(8, 0))
-        ttk.Button(single_actions, text="Clear", command=self.clear).grid(row=0, column=3, sticky="w", padx=(8, 0))
-        ttk.Label(single_actions, textvariable=self.status_var).grid(row=0, column=4, sticky="e", padx=(16, 0))
+        single_actions.grid(row=2, column=0, columnspan=5, sticky="ew", pady=(12, 10))
+        ttk.Button(single_actions, text="Locate", command=self.lookup).grid(row=0, column=0, sticky="w", ipady=2)
+        ttk.Button(single_actions, text="Copy S3 Only", command=self.copy_s3_output).grid(row=0, column=1, sticky="w", padx=(8, 0), ipady=2)
+        ttk.Button(single_actions, text="Copy All Text", command=self.copy_output).grid(row=0, column=2, sticky="w", padx=(8, 0), ipady=2)
+        ttk.Button(single_actions, text="Clear", command=self.clear).grid(row=0, column=3, sticky="w", padx=(8, 0), ipady=2)
+        ttk.Label(single_actions, textvariable=self.status_var).grid(row=0, column=4, sticky="e", padx=(16, 0), pady=(2, 0))
         single_actions.columnconfigure(4, weight=1)
 
         self.output_text = tk.Text(single_tab, wrap="word", height=18)
