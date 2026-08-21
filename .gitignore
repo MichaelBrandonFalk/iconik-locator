@@ -25,6 +25,7 @@ wheels/
 venv/
 venv-*/
 .venv/
+.venv-*/
 ENV/
 **/venv*/
 **/build/

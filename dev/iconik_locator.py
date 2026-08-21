@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Iconik Storage Locator v6.0.0
+Iconik Storage Locator v7.0.0
 
 Fast dependency-free bidirectional locator for Iconik storage origins.
 
@@ -40,7 +40,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 
-VERSION = "6.0.4"
+VERSION = "7.0.0"
 APP_NAME = "Iconik Storage Locator"
 CONFIG_DIR = os.path.join(
     os.path.expanduser("~"), "Library", "Application Support", "IconikLocator"
@@ -1183,4 +1183,3 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
