@@ -12,10 +12,13 @@ import json
 import queue
 import threading
 import tkinter as tk
+import webbrowser
 from tkinter import messagebox, ttk
 from typing import Any, Dict, List
 
 import iconik_locator as loc
+
+ICONIK_API_DOCS_URL = "https://app.iconik.io/docs/api.html#setup-your-access"
 
 
 class LocatorApp(tk.Tk):
@@ -47,17 +50,20 @@ class LocatorApp(tk.Tk):
         outer.columnconfigure(0, weight=1)
         outer.rowconfigure(5, weight=1)
 
-        credentials = ttk.LabelFrame(outer, text="Iconik Credentials", padding=12)
+        credentials = ttk.LabelFrame(outer, text="Iconik API Access", padding=12)
         credentials.grid(row=0, column=0, sticky="ew")
         credentials.columnconfigure(1, weight=1)
         credentials.columnconfigure(3, weight=1)
 
-        ttk.Label(credentials, text="Host").grid(row=0, column=0, sticky="w", padx=(0, 8))
-        ttk.Entry(credentials, textvariable=self.host_var).grid(row=0, column=1, columnspan=3, sticky="ew")
-        ttk.Label(credentials, text="App-ID").grid(row=1, column=0, sticky="w", padx=(0, 8), pady=(10, 0))
-        ttk.Entry(credentials, textvariable=self.app_id_var).grid(row=1, column=1, sticky="ew", pady=(10, 0))
-        ttk.Label(credentials, text="Auth-Token").grid(row=1, column=2, sticky="w", padx=(16, 8), pady=(10, 0))
-        ttk.Entry(credentials, textvariable=self.auth_token_var, show="*").grid(row=1, column=3, sticky="ew", pady=(10, 0))
+        ttk.Label(credentials, text="App-ID").grid(row=0, column=0, sticky="w", padx=(0, 8))
+        ttk.Entry(credentials, textvariable=self.app_id_var).grid(row=0, column=1, sticky="ew")
+        ttk.Label(credentials, text="Auth-Token").grid(row=0, column=2, sticky="w", padx=(16, 8))
+        ttk.Entry(credentials, textvariable=self.auth_token_var, show="*").grid(row=0, column=3, sticky="ew")
+        ttk.Label(
+            credentials,
+            text="Ask your Iconik admin for an App-ID and Auth-Token with asset/file lookup access.",
+        ).grid(row=1, column=0, columnspan=3, sticky="w", pady=(10, 0))
+        ttk.Button(credentials, text="Need these?", command=self._open_credential_help).grid(row=1, column=3, sticky="e", pady=(10, 0))
 
         options = ttk.Frame(outer)
         options.grid(row=1, column=0, sticky="ew", pady=(12, 0))
@@ -71,11 +77,13 @@ class LocatorApp(tk.Tk):
         self.advanced_frame = ttk.LabelFrame(outer, text="Advanced Settings", padding=12)
         self.advanced_frame.columnconfigure(1, weight=1)
         self.advanced_frame.columnconfigure(3, weight=1)
-        ttk.Label(self.advanced_frame, text="If share has multiple assets").grid(row=0, column=0, sticky="w", padx=(0, 8))
-        ttk.Combobox(self.advanced_frame, textvariable=self.share_multi_var, values=loc.VALID_MULTI, state="readonly", width=10).grid(row=0, column=1, sticky="w")
-        ttk.Label(self.advanced_frame, text="If selected file has multiple online copies").grid(row=0, column=2, sticky="w", padx=(18, 8))
-        ttk.Combobox(self.advanced_frame, textvariable=self.file_multi_var, values=loc.VALID_MULTI, state="readonly", width=10).grid(row=0, column=3, sticky="w")
-        ttk.Checkbutton(self.advanced_frame, text="Save settings", variable=self.save_var).grid(row=1, column=0, columnspan=4, sticky="w", pady=(10, 0))
+        ttk.Label(self.advanced_frame, text="Iconik host").grid(row=0, column=0, sticky="w", padx=(0, 8))
+        ttk.Entry(self.advanced_frame, textvariable=self.host_var).grid(row=0, column=1, columnspan=3, sticky="ew")
+        ttk.Label(self.advanced_frame, text="If share has multiple assets").grid(row=1, column=0, sticky="w", padx=(0, 8), pady=(10, 0))
+        ttk.Combobox(self.advanced_frame, textvariable=self.share_multi_var, values=loc.VALID_MULTI, state="readonly", width=10).grid(row=1, column=1, sticky="w", pady=(10, 0))
+        ttk.Label(self.advanced_frame, text="If selected file has multiple online copies").grid(row=1, column=2, sticky="w", padx=(18, 8), pady=(10, 0))
+        ttk.Combobox(self.advanced_frame, textvariable=self.file_multi_var, values=loc.VALID_MULTI, state="readonly", width=10).grid(row=1, column=3, sticky="w", pady=(10, 0))
+        ttk.Checkbutton(self.advanced_frame, text="Save settings", variable=self.save_var).grid(row=2, column=0, columnspan=4, sticky="w", pady=(10, 0))
 
         input_box = ttk.LabelFrame(outer, text="Lookup", padding=12)
         input_box.grid(row=3, column=0, sticky="ew", pady=(12, 0))
@@ -97,6 +105,9 @@ class LocatorApp(tk.Tk):
             self.advanced_frame.grid(row=2, column=0, sticky="ew", pady=(12, 0))
         else:
             self.advanced_frame.grid_remove()
+
+    def _open_credential_help(self) -> None:
+        webbrowser.open(ICONIK_API_DOCS_URL)
 
     def lookup(self) -> None:
         target = self.target_text.get("1.0", "end").strip()

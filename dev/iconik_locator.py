@@ -40,7 +40,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 
-VERSION = "7.0.1"
+VERSION = "7.0.2"
 APP_NAME = "Iconik Storage Locator"
 CONFIG_DIR = os.path.join(
     os.path.expanduser("~"), "Library", "Application Support", "IconikLocator"
