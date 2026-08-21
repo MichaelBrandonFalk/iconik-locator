@@ -202,5 +202,24 @@ class TestReverseLookup(unittest.TestCase):
         self.assertEqual(result["type"], "reverse_list")
 
 
+class TestShareDefaults(unittest.TestCase):
+
+    def test_default_share_multi_lists_all_assets(self):
+        self.assertEqual(loc.DEFAULT_SHARE_MULTI, "ALL")
+
+    def test_share_all_returns_every_asset_id(self):
+        client = MagicMock()
+        client.list_share_assets.return_value = [
+            {"id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"},
+            {"asset_id": "11111111-2222-3333-4444-555555555555"},
+        ]
+        status, ids = loc.share_asset_ids(client, "share-code", loc.DEFAULT_SHARE_MULTI)
+        self.assertEqual(status, "OK_ALL")
+        self.assertEqual(ids, [
+            "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            "11111111-2222-3333-4444-555555555555",
+        ])
+
+
 if __name__ == "__main__":
     unittest.main()

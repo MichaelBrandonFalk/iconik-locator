@@ -23,6 +23,7 @@ The browser version sends requests directly from your browser to Iconik using th
 ## Features
 
 * Paste one Iconik asset link, share link, or asset UUID to get storage details.
+* Share links default to listing every represented asset instead of stopping on multi-asset pages.
 * Use the macOS UI wrapper without running terminal commands.
 * Use the public GitHub Pages browser version when Iconik API access is allowed from your browser.
 * **Reverse Lookup**: Paste an `s3://` URI to instantly find its corresponding Iconik Asset URL.
@@ -116,9 +117,9 @@ https://app.iconik.io/asset/00000000-0000-0000-0000-000000000000
 
 Share links:
 
-* `--multi ERROR` (Default)
+* `--multi ALL` (Default)
+* `--multi ERROR`
 * `--multi FIRST`
-* `--multi ALL`
 
 Multiple storage locations for the selected file:
 

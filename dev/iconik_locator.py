@@ -40,7 +40,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 
-VERSION = "7.0.0"
+VERSION = "7.0.1"
 APP_NAME = "Iconik Storage Locator"
 CONFIG_DIR = os.path.join(
     os.path.expanduser("~"), "Library", "Application Support", "IconikLocator"
@@ -66,6 +66,8 @@ S3_URI_RE = re.compile(r"^s3://([^/]+)/(.*)$", re.I)
 
 VALID_OUTPUTS = ("HTTPS", "S3", "FULL")
 VALID_MULTI = ("ERROR", "FIRST", "ALL")
+DEFAULT_SHARE_MULTI = "ALL"
+DEFAULT_FILE_MULTI = "ALL"
 
 
 def is_tty() -> bool:
@@ -957,8 +959,8 @@ def load_settings(args: argparse.Namespace, ui: UI) -> Tuple[str, str, str, str,
     host = args.host or cfg.get("host") or "https://app.iconik.io"
     saved_output = cfg.get("output") if cfg.get("config_version") == VERSION else None
     output_mode = normalize_mode(args.output or saved_output, "S3", VALID_OUTPUTS)
-    share_multi = normalize_mode(args.multi or cfg.get("multi_share") or cfg.get("multi"), "ERROR", VALID_MULTI)
-    file_multi = normalize_mode(args.multi_files or cfg.get("file_multi"), "ALL", VALID_MULTI)
+    share_multi = normalize_mode(args.multi or cfg.get("multi_share") or cfg.get("multi"), DEFAULT_SHARE_MULTI, VALID_MULTI)
+    file_multi = normalize_mode(args.multi_files or cfg.get("file_multi"), DEFAULT_FILE_MULTI, VALID_MULTI)
     app_id = args.app_id or KeychainStore.get(KEYCHAIN_ACCOUNT_APP_ID) or legacy_app
     auth_token = args.auth_token or KeychainStore.get(KEYCHAIN_ACCOUNT_AUTH_TOKEN) or legacy_token
 
