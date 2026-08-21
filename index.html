@@ -56,6 +56,11 @@
     textarea { min-height: 112px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
     .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    .bulk-panel {
+      border-top: 1px solid var(--line);
+      margin-top: 18px;
+      padding-top: 16px;
+    }
     button, .button {
       border: 0;
       border-radius: 6px;
@@ -181,16 +186,29 @@
         <div class="actions">
           <button id="locate">Locate</button>
           <button class="secondary" id="testApi">Test API Access</button>
+          <button class="secondary" id="copyS3">Copy S3 Only</button>
           <button class="secondary" id="copy">Copy Output</button>
           <button class="secondary" id="clear">Clear</button>
         </div>
         <pre id="result">Ready</pre>
+        <div class="bulk-panel">
+          <h2>Bulk Lookup</h2>
+          <p class="note">Paste one Iconik URL, share URL, UUID, or s3:// URI per line. CSV uploads must use header: <code>iconik_url</code>. For Excel/XLSX upload, use the local macOS app.</p>
+          <textarea id="bulkInput" placeholder="iconik_url&#10;https://app.iconik.io/asset/..."></textarea>
+          <div class="actions">
+            <button id="runBulk">Run Bulk Lookup</button>
+            <input id="bulkFile" type="file" accept=".csv">
+            <button class="secondary" id="downloadBulk">Download CSV</button>
+            <button class="secondary" id="copyBulkS3">Copy S3 Only</button>
+          </div>
+          <pre id="bulkResult">Bulk results will appear here.</pre>
+        </div>
       </section>
       <aside>
         <section class="downloads" aria-labelledby="downloads">
           <h2 id="downloads">Downloads</h2>
           <div class="download-list">
-            <a class="button" href="https://github.com/MichaelBrandonFalk/iconik-locator/releases/latest/download/Iconik_Locator_App_arm64.zip">macOS App: Apple Silicon</a>
+            <a class="button" href="https://github.com/MichaelBrandonFalk/iconik-locator/releases/latest/download/Iconik_Locator_App_v7_0_5_arm64.zip">macOS App: Apple Silicon v7.0.5</a>
             <a class="button" href="https://github.com/MichaelBrandonFalk/iconik-locator">GitHub Repo & More Options</a>
           </div>
           <p class="note">If macOS blocks the app, open <strong>System Settings > Privacy & Security</strong> and allow it. CLI and build options are available in the GitHub repo.</p>
@@ -209,7 +227,7 @@
     </div>
   </main>
   <script>
-    const VERSION = "7.0.4";
+    const VERSION = "7.0.5";
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const ANY_UUID_RE = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
     const S3_URI_RE = /^s3:\/\/([^/]+)\/(.*)$/i;
@@ -219,7 +237,7 @@
       try {
         const data = JSON.parse(sessionStorage.getItem("iconikLocatorSettings") || "{}");
         for (const key of ["host", "appId", "output", "shareMulti", "fileMulti"]) {
-          if (["shareMulti", "fileMulti"].includes(key) && data.version !== VERSION) continue;
+          if (["output", "shareMulti", "fileMulti"].includes(key) && data.version !== VERSION) continue;
           if (data[key] && $(key)) $(key).value = data[key];
         }
       } catch {}
@@ -280,10 +298,14 @@
       return [
         "The browser could not reach Iconik.",
         "",
+        "Because the local app can connect, this is usually browser CORS policy blocking direct API access from this hosted page.",
+        "",
         "Most likely causes:",
-        "- The Iconik host is wrong or unreachable.",
-        "- Your network/VPN is blocking the request.",
         "- Browser CORS policy blocked direct API access from this page.",
+        "- Your network/VPN is blocking the browser request.",
+        "- The Iconik host is wrong or unreachable.",
+        "",
+        "Use the local macOS app for reliable lookups and bulk work.",
         "",
         `Host used: ${host}`,
         "",
@@ -480,6 +502,92 @@
       return lines.join("\n");
     }
 
+    function outputRowsFromResults(input, results) {
+      const rows = [];
+      for (const result of results) {
+        for (const output of result.paths || []) {
+          rows.push({
+            input,
+            status: "OK",
+            asset_id: result.assetId || "",
+            asset_title: result.title || "",
+            file_name: result.fileName || "",
+            output,
+            iconik_url: "",
+            error: ""
+          });
+        }
+      }
+      return rows.length ? rows : [{ input, status: "NO_OUTPUT", asset_id: "", asset_title: "", file_name: "", output: "", iconik_url: "", error: "" }];
+    }
+
+    async function locateRows(input) {
+      const [type, id] = parseTarget(input);
+      if (type === "reverse") {
+        const text = await reverseLookup(id);
+        const rows = [];
+        for (const line of text.split("\n")) {
+          if (/^https?:\/\//.test(line)) rows.push({ input, status: "OK", asset_id: "", asset_title: "", file_name: "", output: "", iconik_url: line, error: "" });
+        }
+        return rows.length ? rows : [{ input, status: "NO_MATCH", asset_id: "", asset_title: "", file_name: "", output: "", iconik_url: "", error: "" }];
+      }
+      if (type === "collection") {
+        return [{ input, status: "COLLECTION", asset_id: "", asset_title: "", file_name: "", output: "", iconik_url: "", error: "Collection links are not expanded in browser bulk mode." }];
+      }
+      const assetIds = type === "asset" ? [id] : await shareAssetIds(id);
+      const results = await Promise.all(assetIds.map(resolveAsset));
+      return outputRowsFromResults(input, results);
+    }
+
+    let bulkRows = [];
+
+    function bulkInputs() {
+      return $("bulkInput").value.split(/\r?\n/).map(line => line.trim()).filter(line => line && line.toLowerCase() !== "iconik_url");
+    }
+
+    async function runBulkLookup() {
+      saveSettings();
+      if (!$("appId").value.trim() || !$("authToken").value.trim()) throw new Error("App-ID and Auth-Token are required.");
+      const inputs = bulkInputs();
+      if (!inputs.length) throw new Error("Paste one input per line or load a CSV with header: iconik_url");
+      bulkRows = [];
+      for (let i = 0; i < inputs.length; i++) {
+        $("bulkResult").textContent = `Processing ${i + 1}/${inputs.length}...`;
+        try {
+          bulkRows.push(...await locateRows(inputs[i]));
+        } catch (error) {
+          bulkRows.push({ input: inputs[i], status: "ERROR", asset_id: "", asset_title: "", file_name: "", output: "", iconik_url: "", error: error.message });
+        }
+      }
+      return formatBulkRows(bulkRows);
+    }
+
+    function formatBulkRows(rows) {
+      return rows.map(row => [row.status, row.input, row.asset_title, row.asset_id, row.file_name, row.output || row.iconik_url, row.error].filter(Boolean).join(" | ")).join("\n") || "No results.";
+    }
+
+    function csvEscape(value) {
+      const text = String(value ?? "");
+      return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    }
+
+    function downloadBulkCsv() {
+      if (!bulkRows.length) return;
+      const fields = ["input", "status", "asset_id", "asset_title", "file_name", "output", "iconik_url", "error"];
+      const csv = [fields.join(","), ...bulkRows.map(row => fields.map(field => csvEscape(row[field])).join(","))].join("\n");
+      const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `iconik_locator_results_${VERSION}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function copyS3From(text) {
+      const matches = text.match(/s3:\/\/[^\s|]+/g) || [];
+      return navigator.clipboard.writeText(matches.join("\n"));
+    }
+
     $("locate").addEventListener("click", async () => {
       $("result").textContent = "Looking up...";
       try {
@@ -496,8 +604,36 @@
         $("result").textContent = `API access test failed\n\n${error.message}`;
       }
     });
+    $("copyS3").addEventListener("click", async () => copyS3From($("result").textContent || ""));
     $("copy").addEventListener("click", async () => navigator.clipboard.writeText($("result").textContent || ""));
     $("clear").addEventListener("click", () => { $("target").value = ""; $("result").textContent = "Ready"; });
+    $("runBulk").addEventListener("click", async () => {
+      $("bulkResult").textContent = "Running bulk lookup...";
+      try {
+        $("bulkResult").textContent = await runBulkLookup();
+      } catch (error) {
+        $("bulkResult").textContent = `Bulk lookup failed\n\n${error.message}`;
+      }
+    });
+    $("downloadBulk").addEventListener("click", downloadBulkCsv);
+    $("copyBulkS3").addEventListener("click", async () => copyS3From($("bulkResult").textContent || ""));
+    $("bulkFile").addEventListener("change", async event => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      if (!file.name.toLowerCase().endsWith(".csv")) {
+        $("bulkResult").textContent = "Browser upload supports CSV only. Use the local macOS app for Excel/XLSX upload. CSV header must be: iconik_url";
+        return;
+      }
+      const text = await file.text();
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      const header = (lines.shift() || "").split(",").map(v => v.trim().replace(/^"|"$/g, ""));
+      const idx = header.indexOf("iconik_url");
+      if (idx === -1) {
+        $("bulkResult").textContent = "CSV must include header: iconik_url";
+        return;
+      }
+      $("bulkInput").value = lines.map(line => line.split(",")[idx] || "").join("\n");
+    });
     loadSettings();
   </script>
 </body>

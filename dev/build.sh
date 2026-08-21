@@ -13,6 +13,13 @@ GUI_SRC="iconik_locator_gui.py"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DIST="${ROOT}/dist"
 BUILD="${ROOT}/build"
+VERSION="$(python3 - "$ROOT/$SRC" <<'PY'
+import re, sys
+text = open(sys.argv[1], encoding="utf-8").read()
+print(re.search(r'^VERSION = "([^"]+)"', text, re.M).group(1))
+PY
+)"
+VERSION_TAG="v${VERSION//./_}"
 export PYINSTALLER_CONFIG_DIR="${ROOT}/.pyinstaller"
 
 die() { echo "ERROR: $*" >&2; exit 1; }
@@ -104,13 +111,13 @@ CHECKSUM_ARTIFACTS+=("${APP_NAME}_arm64")
 arch -arm64 "$ARM_PY" -m PyInstaller \
   --windowed \
   --clean \
-  --name "${GUI_APP_NAME}_arm64" \
+  --name "${GUI_APP_NAME} ${VERSION}_arm64" \
   --distpath "$DIST" \
   --workpath "${BUILD}/${APP_NAME}_gui_arm64" \
   --specpath "$ROOT" \
   "$GUI_SRC"
-sign_if_possible "${DIST}/${GUI_APP_NAME}_arm64.app"
-ARTIFACTS+=("${GUI_APP_NAME}_arm64.app")
+sign_if_possible "${DIST}/${GUI_APP_NAME} ${VERSION}_arm64.app"
+ARTIFACTS+=("${GUI_APP_NAME} ${VERSION}_arm64.app")
 
 X86_PY="$(detect_x86_python || true)"
 if [[ -n "$X86_PY" ]]; then
@@ -131,13 +138,13 @@ if [[ -n "$X86_PY" ]]; then
   arch -x86_64 "$X86_PY" -m PyInstaller \
     --windowed \
     --clean \
-    --name "${GUI_APP_NAME}_x86_64" \
+    --name "${GUI_APP_NAME} ${VERSION}_x86_64" \
     --distpath "$DIST" \
     --workpath "${BUILD}/${APP_NAME}_gui_x86_64" \
     --specpath "$ROOT" \
     "$GUI_SRC"
-  sign_if_possible "${DIST}/${GUI_APP_NAME}_x86_64.app"
-  ARTIFACTS+=("${GUI_APP_NAME}_x86_64.app")
+  sign_if_possible "${DIST}/${GUI_APP_NAME} ${VERSION}_x86_64.app"
+  ARTIFACTS+=("${GUI_APP_NAME} ${VERSION}_x86_64.app")
 else
   echo "WARNING: Skipping x86_64 build; no Intel/Rosetta Python 3 was found." >&2
 fi
@@ -154,15 +161,15 @@ if [[ -f "${APP_NAME}_x86_64" ]]; then
   ARTIFACTS+=("${APP_NAME}_x86_64.zip")
   CHECKSUM_ARTIFACTS+=("${APP_NAME}_x86_64.zip")
 fi
-if [[ -d "${GUI_APP_NAME}_arm64.app" ]]; then
-  zip -q -r "Iconik_Locator_App_arm64.zip" "${GUI_APP_NAME}_arm64.app"
-  ARTIFACTS+=("Iconik_Locator_App_arm64.zip")
-  CHECKSUM_ARTIFACTS+=("Iconik_Locator_App_arm64.zip")
+if [[ -d "${GUI_APP_NAME} ${VERSION}_arm64.app" ]]; then
+  zip -q -r "Iconik_Locator_App_${VERSION_TAG}_arm64.zip" "${GUI_APP_NAME} ${VERSION}_arm64.app"
+  ARTIFACTS+=("Iconik_Locator_App_${VERSION_TAG}_arm64.zip")
+  CHECKSUM_ARTIFACTS+=("Iconik_Locator_App_${VERSION_TAG}_arm64.zip")
 fi
-if [[ -d "${GUI_APP_NAME}_x86_64.app" ]]; then
-  zip -q -r "Iconik_Locator_App_x86_64.zip" "${GUI_APP_NAME}_x86_64.app"
-  ARTIFACTS+=("Iconik_Locator_App_x86_64.zip")
-  CHECKSUM_ARTIFACTS+=("Iconik_Locator_App_x86_64.zip")
+if [[ -d "${GUI_APP_NAME} ${VERSION}_x86_64.app" ]]; then
+  zip -q -r "Iconik_Locator_App_${VERSION_TAG}_x86_64.zip" "${GUI_APP_NAME} ${VERSION}_x86_64.app"
+  ARTIFACTS+=("Iconik_Locator_App_${VERSION_TAG}_x86_64.zip")
+  CHECKSUM_ARTIFACTS+=("Iconik_Locator_App_${VERSION_TAG}_x86_64.zip")
 fi
 shasum -a 256 "${CHECKSUM_ARTIFACTS[@]}" > checksums.txt
 ARTIFACT_LIST=""
