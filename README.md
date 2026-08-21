@@ -6,7 +6,7 @@ The Iconik Storage Locator is a local macOS app designed to quickly find the phy
 
 Get the latest version below. Extract the `.zip` and run the app or executable.
 
-* [**Download macOS App v7.0.6 (Apple Silicon / M1/M2/M3)**](https://github.com/MichaelBrandonFalk/iconik-locator/releases/latest/download/Iconik_Locator_App_v7_0_6_arm64.zip)
+* [**Download macOS App v7.0.7 (Apple Silicon / M1/M2/M3)**](https://github.com/MichaelBrandonFalk/iconik-locator/releases/latest/download/Iconik_Locator_App_v7_0_7_arm64.zip)
 * [**GitHub repo and advanced options**](https://github.com/MichaelBrandonFalk/iconik-locator)
 
 ## Local Mac App
@@ -15,7 +15,7 @@ Use the hosted page for download and setup instructions:
 
 * [**Open Iconik Locator Download Page**](https://michaelbrandonfalk.github.io/iconik-locator/)
 
-The browser lookup tool is intentionally not shown because Iconik can block direct API requests from GitHub Pages. Use the local macOS app for lookups.
+The page gives users the Mac download link and setup steps for the local app.
 
 ## Iconik API Credentials
 
@@ -160,7 +160,7 @@ chmod +x build.sh
   * `iconik_locator.py`: Main script.
   * `iconik_locator_gui.py`: macOS desktop UI wrapper.
   * `build.sh`: macOS build script.
-* `index.html`: Public GitHub Pages browser tool and documentation/download page.
+* `index.html`: Public GitHub Pages documentation and local app download page.
 * `releases/`: Historical and packaged releases.
   * `v5.0.0/`: Legacy version.
   * `v6.0.0/`: Version 6.0.0 source.
