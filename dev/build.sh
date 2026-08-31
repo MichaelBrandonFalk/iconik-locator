@@ -10,6 +10,7 @@ APP_NAME="iconik_locator"
 GUI_APP_NAME="Iconik Locator"
 SRC="iconik_locator.py"
 GUI_SRC="iconik_locator_gui.py"
+GUI_ICON="assets/app_icon.icns"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DIST="${ROOT}/dist"
 BUILD="${ROOT}/build"
@@ -86,6 +87,7 @@ sign_if_possible() {
 cd "$ROOT"
 [[ -f "$SRC" ]] || die "Source not found: $SRC"
 [[ -f "$GUI_SRC" ]] || die "Source not found: $GUI_SRC"
+[[ -f "$GUI_ICON" ]] || die "App icon not found: $GUI_ICON"
 
 rm -rf "$BUILD" "$DIST"
 mkdir -p "$DIST"
@@ -111,6 +113,7 @@ CHECKSUM_ARTIFACTS+=("${APP_NAME}_arm64")
 arch -arm64 "$ARM_PY" -m PyInstaller \
   --windowed \
   --clean \
+  --icon "$GUI_ICON" \
   --name "${GUI_APP_NAME} ${VERSION}_arm64" \
   --distpath "$DIST" \
   --workpath "${BUILD}/${APP_NAME}_gui_arm64" \
@@ -138,6 +141,7 @@ if [[ -n "$X86_PY" ]]; then
   arch -x86_64 "$X86_PY" -m PyInstaller \
     --windowed \
     --clean \
+    --icon "$GUI_ICON" \
     --name "${GUI_APP_NAME} ${VERSION}_x86_64" \
     --distpath "$DIST" \
     --workpath "${BUILD}/${APP_NAME}_gui_x86_64" \

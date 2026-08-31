@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Iconik Locator</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/favicon.png">
   <style>
     :root {
       color-scheme: light;
@@ -30,6 +32,18 @@
       border-bottom: 5px solid var(--accent);
     }
     header .wrap, main { max-width: 1040px; margin: 0 auto; }
+    header .wrap {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 18px;
+      align-items: center;
+    }
+    .site-logo {
+      width: 96px;
+      height: 96px;
+      border-radius: 18px;
+      display: block;
+    }
     h1 { margin: 0 0 8px; font-size: clamp(2rem, 4vw, 3.1rem); letter-spacing: 0; }
     header p { max-width: 760px; margin: 0; color: #d9e5e7; font-size: 1.08rem; }
     header code {
@@ -82,6 +96,8 @@
     }
     @media (max-width: 820px) {
       .grid { grid-template-columns: 1fr; }
+      header .wrap { grid-template-columns: 72px minmax(0, 1fr); gap: 14px; }
+      .site-logo { width: 72px; height: 72px; border-radius: 14px; }
       header { padding-top: 22px; }
     }
   </style>
@@ -89,8 +105,11 @@
 <body>
   <header>
     <div class="wrap">
-      <h1>Iconik Locator</h1>
-      <p>Download the local Mac app to turn Iconik links into usable storage paths, including AWS CLI-ready <code>s3://</code> URLs.</p>
+      <img class="site-logo" src="assets/iconik-locator-logo.png" alt="Iconik Locator logo">
+      <div>
+        <h1>Iconik Locator</h1>
+        <p>Download the local Mac app to turn Iconik links into usable storage paths, including AWS CLI-ready <code>s3://</code> URLs.</p>
+      </div>
     </div>
   </header>
   <main>
@@ -99,7 +118,7 @@
         <section aria-labelledby="download">
           <h2 id="download">Download For Mac</h2>
           <div class="download-list">
-            <a class="button" href="https://github.com/MichaelBrandonFalk/iconik-locator/releases/latest/download/Iconik_Locator_App_v7_0_9_arm64.zip">Download Mac App v7.0.9</a>
+            <a class="button" href="https://github.com/MichaelBrandonFalk/iconik-locator/releases/latest/download/Iconik_Locator_App_v7_0_10_arm64.zip">Download Mac App v7.0.10</a>
             <a class="button" href="https://github.com/MichaelBrandonFalk/iconik-locator">GitHub Repo</a>
           </div>
           <p class="note">This build is for Apple Silicon Macs: M1, M2, M3, and newer. CLI and build options are available in the GitHub repo.</p>
@@ -108,9 +127,9 @@
         <section aria-labelledby="install">
           <h2 id="install">Install And Open</h2>
           <ol>
-            <li>Download <code>Iconik_Locator_App_v7_0_9_arm64.zip</code>.</li>
+            <li>Download <code>Iconik_Locator_App_v7_0_10_arm64.zip</code>.</li>
             <li>Double-click the zip file to extract it.</li>
-            <li>Open <code>Iconik Locator 7.0.9_arm64.app</code>.</li>
+            <li>Open <code>Iconik Locator 7.0.10_arm64.app</code>.</li>
             <li>If macOS blocks it, open <strong>System Settings &gt; Privacy &amp; Security</strong>, then choose <strong>Open Anyway</strong> for Iconik Locator.</li>
           </ol>
         </section>
