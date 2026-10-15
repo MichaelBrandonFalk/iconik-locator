@@ -1,21 +1,32 @@
 # Iconik Storage Locator
 
-The Iconik Storage Locator is a local macOS app designed to quickly find the physical storage location (S3 URIs, HTTPS URLs, or local paths) of assets in Iconik.
+The Iconik Storage Locator is a local Windows, Linux Mint, and macOS app designed to quickly find the physical storage location (S3 URIs, HTTPS URLs, or local paths) of assets in Iconik.
 
 ## Download Iconik Locator
 
 Get the latest version below. Extract the `.zip` and run the app or executable.
 
-* [**Download macOS App v7.0.10 (Apple Silicon / M1/M2/M3)**](https://github.com/MichaelBrandonFalk/iconik-locator/releases/latest/download/Iconik_Locator_App_v7_0_10_arm64.zip)
+* [**Windows 10/11 v7.0.11 (Intel/AMD 64-bit ZIP)**](https://github.com/MichaelBrandonFalk/iconik-locator/releases/download/v7.0.11/Iconik_Locator_App_v7_0_11_windows_x86_64.zip)
+* [**Linux Mint 21/22 v7.0.11 (64-bit DEB installer)**](https://github.com/MichaelBrandonFalk/iconik-locator/releases/download/v7.0.11/Iconik_Locator_App_v7_0_11_linux_amd64.deb)
+* [**Linux portable v7.0.11 (64-bit archive)**](https://github.com/MichaelBrandonFalk/iconik-locator/releases/download/v7.0.11/Iconik_Locator_App_v7_0_11_linux_x86_64.tar.gz)
+* [**macOS App v7.0.11 (Apple Silicon)**](https://github.com/MichaelBrandonFalk/iconik-locator/releases/download/v7.0.11/Iconik_Locator_App_v7_0_11_arm64.zip)
 * [**GitHub repo and advanced options**](https://github.com/MichaelBrandonFalk/iconik-locator)
 
-## Local Mac App
+## Install And Open
 
 Use the hosted page for download and setup instructions:
 
 * [**Open Iconik Locator Download Page**](https://michaelbrandonfalk.github.io/iconik-locator/)
 
-The page gives users the Mac download link and setup steps for the local app.
+Windows: right-click the ZIP, choose **Extract All**, and open **Iconik Locator 7.0.11.exe** from the extracted folder. Keep `_internal` beside the executable.
+
+Linux Mint 21/22: double-click the `.deb`, select **Install Package**, and open **Iconik Locator** from the application menu. The portable archive can also be extracted and run directly; allow execution in file Properties > Permissions if needed.
+
+Mac: extract the ZIP, move **Iconik Locator 7.0.11_arm64.app** to Applications, and open it.
+
+Python is included in all downloads. Windows/Linux builds target Intel/AMD 64-bit computers.
+
+Saved credentials use Windows Credential Manager, Linux Secret Service (the Mint login keyring), or macOS Keychain. Unlock the login keyring in **Passwords and Keys** on Mint if needed. Tokens are never written to the configuration file or uploaded to GitHub.
 
 ## Iconik API Credentials
 
@@ -33,7 +44,7 @@ Use **Test API Access** before a lookup to confirm that Iconik accepts the App-I
 
 * Paste one Iconik asset link, share link, or asset UUID to get storage details.
 * Share links default to listing every represented asset instead of stopping on multi-asset pages.
-* Use the macOS UI wrapper without running terminal commands.
+* Use the desktop UI without running terminal commands.
 * Run bulk lookups from pasted rows or a spreadsheet with header `iconik_url`; export results as CSV or XLSX in the local app.
 * **Reverse Lookup**: Paste an `s3://` URI to instantly find its corresponding Iconik Asset URL.
 * Get the S3 URI directly in Terminal.
@@ -42,7 +53,7 @@ Use **Test API Access** before a lookup to confirm that Iconik accepts the App-I
 * Located URI lines include online/offline status.
 * `Output` / `Outputs` include only online storage locations.
 * **Interactive Mode**: Rapidly perform multiple lookups in succession seamlessly crossing between Iconik URLs and S3 URIs.
-* Dependency-free runtime (Python standard library only).
+* Packaged downloads include Python, Tk, and the platform credential-store dependencies.
 
 ## Deliverables
 
@@ -147,6 +158,8 @@ For high-speed, successive lookups, run the tool without an input argument to en
 Simply paste an Iconik link or UUID and press Enter. The tool will display the results and immediately prompt for the next one. Type `help` for instructions or `q` to quit.
 
 ## Build
+
+Windows and Linux packages are built natively by `.github/workflows/build-desktop.yml`. Linux uses Ubuntu 22.04 system Python to target the glibc baseline used by Linux Mint 21 and newer. The builder runs core/platform tests and starts the packaged GUI to check both tabs. Run locally on the target OS with `python dev/build_desktop.py` after installing PyInstaller, Pillow, and keyring; Linux also requires Tk and `dpkg-deb`.
 
 ```sh
 cd dev

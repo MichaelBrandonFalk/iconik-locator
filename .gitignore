@@ -35,6 +35,7 @@ ENV/
 *.manifest
 *.spec
 .pyinstaller/
+.playwright-cli/
 
 # macOS
 .DS_Store
