@@ -40,11 +40,17 @@ from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 
-VERSION = "7.0.10"
+VERSION = "7.0.11"
 APP_NAME = "Iconik Storage Locator"
-CONFIG_DIR = os.path.join(
-    os.path.expanduser("~"), "Library", "Application Support", "IconikLocator"
-)
+def config_directory() -> str:
+    if sys.platform == "darwin":
+        return os.path.join(os.path.expanduser("~"), "Library", "Application Support", "IconikLocator")
+    if sys.platform == "win32":
+        return os.path.join(os.environ.get("APPDATA") or os.path.expanduser("~"), "IconikLocator")
+    return os.path.join(os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"), "IconikLocator")
+
+
+CONFIG_DIR = config_directory()
 CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
 KEYCHAIN_SERVICE = "IconikLocator"
 KEYCHAIN_ACCOUNT_APP_ID = "app_id"
@@ -201,8 +207,21 @@ class ConfigStore:
 
 class KeychainStore:
     @staticmethod
+    def _backend() -> Any:
+        if sys.platform == "win32":
+            from keyring.backends.Windows import WinVaultKeyring
+            return WinVaultKeyring()
+        from keyring.backends.SecretService import Keyring
+        return Keyring()
+
+    @staticmethod
     def available() -> bool:
-        return sys.platform == "darwin" and shutil.which("security") is not None
+        if sys.platform == "darwin":
+            return shutil.which("security") is not None
+        try:
+            return KeychainStore._backend().priority > 0
+        except Exception:
+            return False
 
     @staticmethod
     def _run(args: Sequence[str]) -> subprocess.CompletedProcess[str]:
@@ -217,6 +236,11 @@ class KeychainStore:
     def get(cls, account: str) -> str:
         if not cls.available():
             return ""
+        if sys.platform != "darwin":
+            try:
+                return cls._backend().get_password(KEYCHAIN_SERVICE, account) or ""
+            except Exception:
+                return ""
         proc = cls._run(
             ["find-generic-password", "-s", KEYCHAIN_SERVICE, "-a", account, "-w"]
         )
@@ -226,7 +250,12 @@ class KeychainStore:
 
     @classmethod
     def set(cls, account: str, value: str) -> None:
-        if not value or not cls.available():
+        if not value:
+            return
+        if not cls.available():
+            raise RuntimeError("The system credential store is unavailable. On Linux Mint, unlock Passwords and Keys (the login keyring), then try again. Credentials were not saved.")
+        if sys.platform != "darwin":
+            cls._backend().set_password(KEYCHAIN_SERVICE, account, value)
             return
         proc = cls._run(
             ["add-generic-password", "-U", "-s", KEYCHAIN_SERVICE, "-a", account, "-w", value]
@@ -238,6 +267,9 @@ class KeychainStore:
     @classmethod
     def delete(cls, account: str) -> None:
         if not cls.available():
+            return
+        if sys.platform != "darwin":
+            cls._backend().delete_password(KEYCHAIN_SERVICE, account)
             return
         cls._run(["delete-generic-password", "-s", KEYCHAIN_SERVICE, "-a", account])
 

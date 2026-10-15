@@ -12,6 +12,7 @@ import json
 import csv
 import queue
 import re
+import sys
 import threading
 import tkinter as tk
 import webbrowser
@@ -56,7 +57,6 @@ class LocatorApp(tk.Tk):
         outer = ttk.Frame(self, padding=16)
         outer.pack(fill=tk.BOTH, expand=True)
         outer.columnconfigure(0, weight=1)
-        outer.rowconfigure(5, weight=1)
 
         credentials = ttk.LabelFrame(outer, text="Iconik API Access", padding=12)
         credentials.grid(row=0, column=0, sticky="ew")
@@ -222,8 +222,11 @@ class LocatorApp(tk.Tk):
             multi=share_multi,
             file_multi=file_multi,
         )
-        loc.KeychainStore.set(loc.KEYCHAIN_ACCOUNT_APP_ID, self.app_id_var.get().strip())
-        loc.KeychainStore.set(loc.KEYCHAIN_ACCOUNT_AUTH_TOKEN, self.auth_token_var.get().strip())
+        try:
+            loc.KeychainStore.set(loc.KEYCHAIN_ACCOUNT_APP_ID, self.app_id_var.get().strip())
+            loc.KeychainStore.set(loc.KEYCHAIN_ACCOUNT_AUTH_TOKEN, self.auth_token_var.get().strip())
+        except Exception:
+            self.result_queue.put(("credential_warning", "The lookup can continue, but credentials could not be saved to the system credential store. On Linux Mint, unlock your login keyring in Passwords and Keys and try again."))
 
     def _format_result(self, client: loc.IconikClient, result: Dict[str, Any]) -> str:
         if result["type"] == "collection":
@@ -287,6 +290,8 @@ class LocatorApp(tk.Tk):
             self.output_text.delete("1.0", "end")
             self.output_text.insert("1.0", str(payload))
             self.status_var.set("Done")
+        elif kind == "credential_warning":
+            messagebox.showwarning("Credentials Not Saved", str(payload))
         elif kind == "bulk_progress":
             self.bulk_output_text.delete("1.0", "end")
             self.bulk_output_text.insert("1.0", str(payload))
@@ -569,6 +574,31 @@ class LocatorApp(tk.Tk):
 
 
 def main() -> None:
+    if len(sys.argv) == 3 and sys.argv[1] == "--smoke-test":
+        # Exercise the packaged GUI without accessing credentials or the network.
+        loc.ConfigStore.load = staticmethod(lambda: {})
+        loc.KeychainStore.get = classmethod(lambda cls, account: "")
+        app = LocatorApp()
+        try:
+            tabs = next(w for w in app.winfo_children()[0].winfo_children() if isinstance(w, ttk.Notebook))
+            checks = []
+            for size in ("980x720", "1100x850"):
+                app.geometry(size)
+                for tab in tabs.tabs():
+                    tabs.select(tab)
+                    app.update()
+                    frame = app.nametowidget(tab)
+                    actions = next(w for w in frame.winfo_children() if isinstance(w, ttk.Frame))
+                    for button in actions.winfo_children():
+                        if isinstance(button, ttk.Button):
+                            assert button.winfo_height() >= 20, button.cget("text")
+                            assert button.winfo_rooty() + button.winfo_height() <= app.winfo_rooty() + app.winfo_height(), button.cget("text")
+                    checks.append({"size": size, "tab": tabs.tab(tab, "text")})
+            with open(sys.argv[2], "w", encoding="utf-8") as report:
+                json.dump({"version": loc.VERSION, "platform": sys.platform, "checks": checks}, report)
+        finally:
+            app.destroy()
+        return
     app = LocatorApp()
     app.mainloop()
 
