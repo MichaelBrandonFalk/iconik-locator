@@ -10,15 +10,15 @@ import iconik_locator as loc
 class PlatformTests(unittest.TestCase):
     def test_windows_config_uses_appdata(self):
         with patch.object(sys, "platform", "win32"), patch.dict(os.environ, {"APPDATA": "/user/appdata"}):
-            self.assertEqual(loc.config_directory(), "/user/appdata/IconikLocator")
+            self.assertEqual(loc.config_directory(), os.path.join("/user/appdata", "IconikLocator"))
 
     def test_linux_config_uses_xdg(self):
         with patch.object(sys, "platform", "linux"), patch.dict(os.environ, {"XDG_CONFIG_HOME": "/user/config"}):
-            self.assertEqual(loc.config_directory(), "/user/config/IconikLocator")
+            self.assertEqual(loc.config_directory(), os.path.join("/user/config", "IconikLocator"))
 
     def test_mac_config_stays_compatible(self):
         with patch.object(sys, "platform", "darwin"):
-            self.assertTrue(loc.config_directory().endswith("Library/Application Support/IconikLocator"))
+            self.assertTrue(loc.config_directory().endswith(os.path.join("Library", "Application Support", "IconikLocator")))
 
     def test_native_credentials_use_secure_backend(self):
         for platform in ("win32", "linux"):
